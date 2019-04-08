@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Item;
+use Validator;
 
 class ItemsController extends Controller
 {
@@ -13,7 +15,8 @@ class ItemsController extends Controller
      */
     public function index()
     {
-        //
+        $items = Item::all();
+        return response()->json($items);
     }
 
     /**
@@ -34,7 +37,25 @@ class ItemsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Validation with custom response
+        $validator = Validator::make($request->all(), [
+            'text' => 'required'
+        ]);
+
+        if ($validator->fails()) {
+            // Response error
+            $response = array('response' => $validator->messages(), 'success' => false);
+
+            return $response;
+        } else {
+            // Create Item
+            $item = new Item;
+            $item->text = $request->input('text');
+            $item->body = $request->input('body');
+            $item->save();
+
+            return response()->json($item);
+        }
     }
 
     /**
@@ -45,7 +66,9 @@ class ItemsController extends Controller
      */
     public function show($id)
     {
-        //
+        $item = Item::find($id);
+
+        return response()->json($item, $status = 200);
     }
 
     /**
@@ -68,7 +91,23 @@ class ItemsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        // Validation with custom response
+        $validator = Validator::make($request->all(), ['text' => 'required']);
+
+        if ($validator->fails()) {
+            // Response error
+            $response = array('response' => $validator->messages(), 'success' => false);
+
+            return $response;
+        } else {
+            // Find and Update an Item
+            $item = Item::find($id);
+            $item->text = $request->input('text');
+            $item->body = $request->input('body');
+            $item->save();
+
+            return response()->json($item);
+        }
     }
 
     /**
@@ -79,6 +118,12 @@ class ItemsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // Find and Delete an Item
+        $item = Item::find($id);
+
+        $item->delete();
+
+        $response = array('response' => 'Item Deleted.', 'success' => true);
+        return $response;
     }
 }
