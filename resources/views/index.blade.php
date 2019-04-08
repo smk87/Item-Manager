@@ -36,7 +36,9 @@
                 <label>Body</label>
                 <textarea id="body" class="form-control"></textarea>
             </div>
+            <input type="hidden" id="upid">
             <input type="submit" value="Submit" class="btn btn-primary">
+            <a href="#" id="update" class="btn btn-info">Update</a>
         </form>
         <br />
         <hr />
@@ -64,7 +66,7 @@
             });
 
             //Delete event
-            $('body').on('click', '.deleteLink', function (e) {
+            $('body').on('click', '.btn.btn-danger', function (e) {
                 e.preventDefault();
 
                 let id = $(this).data('id');
@@ -100,6 +102,44 @@
                 })
             }
 
+            //Update event
+            $('body').on('click', '.btn.btn-success', function (e) {
+                e.preventDefault();
+
+                let id = $(this).data('id');
+                updateItem(id);
+            });
+
+            $('#update').on('click', function (e) {
+                e.preventDefault();
+                var id = $('#upid').val();
+
+                $.ajax({
+                    method: 'POST',
+                    url: 'http://lva.com/api/items/' + id,
+                    data: {
+                        text: $('#text').val(),
+                        body: $('#body').val(),
+                        _method: 'PUT'
+                    }
+                }).done(function (item) {
+                    alert(`Item #${id} Updated.`);
+                    location.reload();
+                })
+
+            })
+
+            // Update Item using api
+            function updateItem(id) {
+                $.ajax({
+                    url: 'http://lva.com/api/items/' + id
+                }).done(function (item) {
+                    $('input[id="text"]').val(item.text);
+                    $('#body').val(item.body);
+                    $('#upid').val(id);
+                })
+            }
+
             // Get Items from api
             function getItems() {
                 $.ajax({
@@ -110,7 +150,8 @@
                         output += `
                         <li class="list-group-item">
                         <strong>${item.text}: </strong>${item.body}
-                        <a href="#" class="deleteLink" data-id="${item.id}">Delete</a>
+                        <a href="#" class="btn btn-danger" data-id="${item.id}">Delete</a>
+                        <a href="#" class="btn btn-success" data-id="${item.id}">Edit</a>
                         </li>`
                     });
 
